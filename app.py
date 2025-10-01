@@ -20,6 +20,12 @@ db.init_app(app)
 
 @app.route('/add_author',methods=['GET','POST'])
 def add_author():
+    """
+     Route: /add_author
+     - GET: Render a form to add a new author.
+     - POST: Validate form input, add author to database,
+       then redirect to authors list with a flash success message.
+     """
     success = None
     if request.method == 'POST':
         data = request.form
@@ -51,11 +57,20 @@ def add_author():
 
 @app.route('/authors')
 def list_authors():
+    """
+    Route: /authors
+    - Lists all authors currently stored in the database.
+    """
     authors = Author.query.all()
     return render_template('authors.html', authors=authors)
 
 @app.route('/add_book',methods=['GET','POST'])
 def add_book():
+    """
+     Route: /add_book
+     - GET: Show a form to add a new book (with dropdown for authors).
+     - POST: Add a new book to the database if valid input is provided.
+     """
     authors = Author.query.all()
     success = None
     if request.method == 'POST':
@@ -75,7 +90,7 @@ def add_book():
                 title=title,
                 isbn=isbn,
                 publication_year=publication_year,
-                author_id=author_id,
+                author_id=int(author_id),
             )
             db.session.add(book)
             db.session.commit()
@@ -85,6 +100,12 @@ def add_book():
 
 @app.route('/',methods=['GET'])
 def home():
+    """
+    Route: /
+    - Displays all books with optional sorting and search functionality.
+    - Sorting: by title (default) or author.
+    - Searching: matches query against book title or author name
+    """
     sort_by = request.args.get('sort', 'title')
     search_query = request.args.get('q','')
 
@@ -106,11 +127,22 @@ def home():
 
 @app.route('/book/<int:book_id>')
 def book_detail(book_id):
+    """
+      Route: /book/<book_id>
+      - Shows detailed information about a specific book.
+      - Returns 404 if book does not exist.
+      """
     book = Book.query.get_or_404(book_id)
     return render_template('book_detail.html', book=book)
 
 @app.route('/book/<int:book_id>/delete',methods=['POST'])
 def delete_book(book_id):
+    """
+    Route: /book/<book_id>/delete
+    - Deletes the selected book.
+    - If the book's author has no remaining books, deletes the author too.
+    - Redirects to homepage with a flash success message.
+    """
     book = Book.query.get_or_404(book_id)
 
     author = book.author
