@@ -1,3 +1,5 @@
+from sqlalchemy import asc
+
 from data_models import db, Author, Book
 from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
@@ -77,7 +79,23 @@ def add_book():
             db.session.add(book)
             db.session.commit()
             success = f"Book {title} added successfully."
+
     return render_template('add_book.html',authors=authors,success=success)
+
+@app.route('/',methods=['GET'])
+def home():
+    sort_by = request.args.get('sort', 'title')
+    if sort_by == 'author':
+        books = Book.query.join(Author).order_by(asc(Author.name)).all()
+    else:  # default
+        books = Book.query.order_by(asc(Book.title)).all()
+
+    return render_template('home.html', books=books, sort_by=sort_by)
+
+@app.route('/book/<int:book_id>')
+def book_detail(book_id):
+    book = Book.query.get_or_404(book_id)
+    return render_template('book_detail.html', book=book)
 
  #with app.app_context():
  #   db.create_all()
