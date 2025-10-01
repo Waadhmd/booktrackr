@@ -1,4 +1,5 @@
 from sqlalchemy import asc
+from sqlalchemy.orm import joinedload
 
 from data_models import db, Author, Book
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -85,12 +86,23 @@ def add_book():
 @app.route('/',methods=['GET'])
 def home():
     sort_by = request.args.get('sort', 'title')
-    if sort_by == 'author':
-        books = Book.query.join(Author).order_by(asc(Author.name)).all()
-    else:  # default
-        books = Book.query.order_by(asc(Book.title)).all()
+    search_query = request.args.get('q','')
 
-    return render_template('home.html', books=books, sort_by=sort_by)
+    query = Book.query.options(joinedload(Book.author))
+    #if search term provided
+    if search_query:
+        query = query.join(Author).filter(
+            (Book.title.ilike(f"%{search_query}%")) |
+            (Author.name.ilike(f"%{search_query}%"))
+        )
+
+    if sort_by == 'author':
+        query = query.join(Author).order_by(asc(Author.name))
+    else:
+        query = query.order_by(asc(Book.title))
+    books = query.all()
+
+    return render_template('home.html', books=books, sort_by=sort_by, search_query=search_query)
 
 @app.route('/book/<int:book_id>')
 def book_detail(book_id):
