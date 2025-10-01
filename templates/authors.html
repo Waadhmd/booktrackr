@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authors</title>
+</head>
+<body>
+    <h1>All Authors</h1>
+
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Name</th>
+            <th>Birth Date</th>
+            <th>Date of Death</th>
+        </tr>
+        {% for author in authors %}
+        <tr>
+            <td>{{ author.name }}</td>
+            <td>{{ author.birth_date }}</td>
+            <td>{{ author.date_of_death or "N/A" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <p><a href="{{ url_for('add_author') }}">Add another author</a></p>
+</body>
+</html>
