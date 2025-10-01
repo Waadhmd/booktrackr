@@ -4,7 +4,6 @@ from sqlalchemy.orm import joinedload
 from data_models import db, Author, Book
 from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
 import os
 
 
