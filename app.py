@@ -109,6 +109,26 @@ def book_detail(book_id):
     book = Book.query.get_or_404(book_id)
     return render_template('book_detail.html', book=book)
 
+@app.route('/book/<int:book_id>/delete',methods=['POST'])
+def delete_book(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    author = book.author
+    # Delete the book
+    db.session.delete(book)
+    db.session.commit()
+    # If the author has no more books, delete them too
+    if not author.books:
+        db.session.delete(author)
+        db.session.commit()
+        flash(f"Book '{book.title}' and author '{author.name}' were deleted successfully.", "success")
+    else:
+        flash(f"Book '{book.title}' was deleted successfully.", "success")
+
+    return redirect(url_for('home'))
+
+
+
  #with app.app_context():
  #   db.create_all()
 if __name__ == '__main__':
